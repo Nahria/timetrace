@@ -1,5 +1,5 @@
 <h1>:alarm_clock: timetrace
-<a href="https://circleci.com/gh/nahria/timetrace"><img src="https://circleci.com/gh/nahria/timetrace.svg?style=shield"></a>
+<a href="https://circleci.com/gh/nahria/timetrace"><img src="https://dl.circleci.com/status-badge/img/circleci/HyV7TFL93wunXW2rRwW69Z/FuaWNkKyTZG35evMBKroed/tree/main.svg?style=shield"></a>
 <a href="https://github.com/nahria/timetrace/releases"><img src="https://img.shields.io/github/v/release/nahria/timetrace?sort=semver"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-brightgreen"></a>
 </h1>
