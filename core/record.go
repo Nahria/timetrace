@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -263,7 +264,7 @@ func (t *Timetrace) EditRecordManual(recordTime time.Time) error {
 }
 
 // EditRecord loads the record internally, applies the option values and saves the record
-func (t *Timetrace) EditRecord(recordTime time.Time, plus string, minus string) error {
+func (t *Timetrace) EditRecord(recordTime time.Time, plus string, minus string, billable string) error {
 	path := t.fs.RecordFilepath(recordTime)
 
 	record, err := t.loadRecord(path)
@@ -271,7 +272,7 @@ func (t *Timetrace) EditRecord(recordTime time.Time, plus string, minus string) 
 		return err
 	}
 
-	err = t.editRecord(record, plus, minus)
+	err = t.editRecord(record, plus, minus, billable)
 	if err != nil {
 		return err
 	}
@@ -493,22 +494,37 @@ func (t *Timetrace) loadRecord(path string) (*Record, error) {
 	return &record, nil
 }
 
-func (t *Timetrace) editRecord(record *Record, plus string, minus string) error {
-
+func (t *Timetrace) editRecord(record *Record, plus string, minus string, billable string) error {
 	if record.End == nil {
 		return errors.New("record is still in progress")
 	}
 
 	var dur time.Duration
 	var err error
+
+	if plus == "" && minus == "" && billable == "" {
+		return errors.New("nothing to change")
+	}
+
+	// Changing the duration if plus or minus is provided
 	if plus != "" {
 		dur, err = time.ParseDuration(plus)
-	} else {
+	} else if minus != "" {
 		dur, err = time.ParseDuration(minus)
 		dur = -dur
 	}
+
 	if err != nil {
 		return err
+	}
+
+	// Changing the billable status if billable is provided
+	if billable != "" {
+		billableBool, err := strconv.ParseBool(billable)
+		if err != nil {
+			return err
+		}
+		record.IsBillable = billableBool
 	}
 
 	newEnd := record.End.Add(dur)
