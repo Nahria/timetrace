@@ -287,12 +287,17 @@ func (t *Timetrace) EditRecord(recordTime time.Time, plus string, minus string, 
 
 func (t *Timetrace) loadAllRecords(date time.Time) ([]*Record, error) {
 	dir := t.fs.RecordDirFromDate(date)
-
 	recordFilepaths, err := t.fs.RecordFilepaths(dir, func(_, _ string) bool {
 		return true
 	})
 	if err != nil {
-		return nil, err
+        switch err.(type) {
+            case *os.PathError:
+                // Folder doesn't exist at this path
+                return nil, nil
+            default:
+                return nil, err
+        }
 	}
 
 	var records []*Record
