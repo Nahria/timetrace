@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"fmt"
-
 	"github.com/nahria/timetrace/core"
 	"github.com/nahria/timetrace/out"
 
@@ -46,23 +44,18 @@ func getProjectCommand(t *core.Timetrace) *cobra.Command {
 }
 
 func getRecordCommand(t *core.Timetrace) *cobra.Command {
-
-	// Depending on the use12hours setting, the command syntax either is
-	// `record YYYY-MM-DD-HH-MM` or `record YYYY-MM-DD-HH-MMPM`.
-	use := fmt.Sprintf("record %s", t.Formatter().RecordKeyLayout())
-
 	getRecord := &cobra.Command{
-		Use:   use,
+		Use:   "record {<KEY>|latest|@iID}",
 		Short: "Display a record",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			start, err := t.Formatter().ParseRecordKey(args[0])
+			recordTime, err := getRecordTimeFromArg(t, args[0])
 			if err != nil {
-				out.Err("failed to parse date argument: %s", err.Error())
+				out.Err(err.Error())
 				return
 			}
 
-			record, err := t.LoadRecord(start)
+			record, err := t.LoadRecord(recordTime)
 			if err != nil {
 				out.Err("failed to read record: %s", err.Error())
 				return

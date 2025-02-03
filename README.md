@@ -317,18 +317,24 @@ timetrace get project make-coffee
 **Syntax:**
 
 ```
-timetrace get record <YYYY-MM-DD-HH-MM>
+timetrace get record {<KEY>|latest}
 ```
 
 **Arguments:**
 
 | Argument           | Description                           |
 | ------------------ | ------------------------------------- |
-| `YYYY-MM-DD-HH-MM` | The start time of the desired record. |
+| `KEY`    | The project key. `YYYY-MM-DD-HH-MM` by default or `YYYY-MM-DD-HH-MMPM` if [`use12hours` is set](#prefer-12-hour-clock-for-storing-records). |
 
 **Example:**
 
-By default, records can be accessed using the 24-hour format, meaning 3:00 PM is 15. Display a record created on May 1st 2021, 3:00 PM:
+Get the latest record.
+
+```
+timetrace get record latest
+```
+
+Records can be accessed using the 24-hour format, meaning 3:00 PM is 15. Display a record created on May 1st 2021, 3:00 PM:
 
 ```
 timetrace get record 2021-05-01-15-00
