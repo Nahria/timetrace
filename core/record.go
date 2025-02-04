@@ -23,11 +23,12 @@ var (
 )
 
 type Record struct {
-	Start      time.Time  `json:"start"`
-	End        *time.Time `json:"end"`
-	Project    *Project   `json:"project"`
-	IsBillable bool       `json:"is_billable"`
-	Tags       []string   `json:"tags"`
+	Start       time.Time  `json:"start"`
+	End         *time.Time `json:"end"`
+	Project     *Project   `json:"project"`
+	IsBillable  bool       `json:"is_billable"`
+	Tags        []string   `json:"tags"`
+	Description string     `json:"description"`
 }
 
 // Duration calculates time duration for a specific record. If the record doesn't
@@ -264,7 +265,7 @@ func (t *Timetrace) EditRecordManual(recordTime time.Time) error {
 }
 
 // EditRecord loads the record internally, applies the option values and saves the record
-func (t *Timetrace) EditRecord(recordTime time.Time, plus string, minus string, billable string) error {
+func (t *Timetrace) EditRecord(recordTime time.Time, plus string, minus string, billable string, description *string) error {
 	path := t.fs.RecordFilepath(recordTime)
 
 	record, err := t.loadRecord(path)
@@ -272,7 +273,7 @@ func (t *Timetrace) EditRecord(recordTime time.Time, plus string, minus string, 
 		return err
 	}
 
-	err = t.editRecord(record, plus, minus, billable)
+	err = t.editRecord(record, plus, minus, billable, description)
 	if err != nil {
 		return err
 	}
@@ -291,13 +292,13 @@ func (t *Timetrace) loadAllRecords(date time.Time) ([]*Record, error) {
 		return true
 	})
 	if err != nil {
-        switch err.(type) {
-            case *os.PathError:
-                // Folder doesn't exist at this path
-                return nil, nil
-            default:
-                return nil, err
-        }
+		switch err.(type) {
+		case *os.PathError:
+			// Folder doesn't exist at this path
+			return nil, nil
+		default:
+			return nil, err
+		}
 	}
 
 	var records []*Record
@@ -499,7 +500,7 @@ func (t *Timetrace) loadRecord(path string) (*Record, error) {
 	return &record, nil
 }
 
-func (t *Timetrace) editRecord(record *Record, plus string, minus string, billable string) error {
+func (t *Timetrace) editRecord(record *Record, plus string, minus string, billable string, description *string) error {
 	if record.End == nil {
 		return errors.New("record is still in progress")
 	}
@@ -507,7 +508,7 @@ func (t *Timetrace) editRecord(record *Record, plus string, minus string, billab
 	var dur time.Duration
 	var err error
 
-	if plus == "" && minus == "" && billable == "" {
+	if plus == "" && minus == "" && billable == "" && description == nil {
 		return errors.New("nothing to change")
 	}
 
@@ -537,6 +538,11 @@ func (t *Timetrace) editRecord(record *Record, plus string, minus string, billab
 		return errors.New("new ending time is before start time of record")
 	}
 	record.End = &newEnd
+
+	// Changing the description if description is provided
+	if description != nil {
+		record.Description = *description
+	}
 
 	return nil
 }

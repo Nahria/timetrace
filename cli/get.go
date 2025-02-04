@@ -86,14 +86,20 @@ func showRecord(record *core.Record, formatter *core.Formatter) {
 		project = record.Project.Key
 	}
 
+	description := defaultString
+	if record.Description != "" {
+		description = record.Description
+	}
+
 	rows := [][]string{
 		{
 			formatter.TimeString(record.Start),
 			end,
 			project,
 			isBillable,
+			description,
 		},
 	}
 
-	out.Table([]string{"Start", "End", "Project", "Billable"}, rows, nil)
+	out.Table([]string{"Start", "End", "Project", "Billable", "Description"}, rows, nil)
 }

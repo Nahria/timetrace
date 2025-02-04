@@ -147,6 +147,7 @@ timetrace start <PROJECT KEY> [+TAG1, +TAG2, ...]
 | ---------------- | ----- | ---------------------------------------------------------------------------------------------------------- |
 | `--billable`     | `-b`  | Mark the record as billable.                                                                               |
 | `--non-billable` |       | Mark the record as non-billable, even if the project is [billable by default](#per-project-configuration). |
+| `--description`  | `-d`  | Add a description to the record.                                                                           |
 
 **Example:**
 
@@ -160,6 +161,12 @@ Start working on the `make-coffee` project and add two tags:
 
 ```
 timetrace start make-coffee +espresso +morning
+```
+
+Start working on the `make-coffee` project and add a description:
+
+```
+timetrace start make-coffee -d "Using V60 method."
 ```
 
 ### Print the tracking status
@@ -282,12 +289,24 @@ timetrace create record <PROJECT KEY> {<YYYY-MM-DD>|today|yesterday} <HH:MM> <HH
 | `HH:MM`       | The start time of the record.                                                    |
 | `HH:MM`       | The end time of the record.                                                      |
 
+**Flags:**
+
+| Flag             | Short | Description                                                                                                |
+| ---------------- | ----- | ---------------------------------------------------------------------------------------------------------- |
+| `--description`  | `-d`  | Add a description to the record.                                                                           |
+
 **Example:**
 
 Create a record for the `make-coffee` project today from 07:00 to 08:30:
 
 ```
 timetrace create record make-coffee today 07:00 08:30
+```
+
+Create a record for the `make-coffee` project today from 07:00 to 08:30 with a description:
+
+```
+timetrace create record make-coffee today 07:00 08:30 -d "Using V60 method."
 ```
 
 ### Get a project
@@ -333,7 +352,7 @@ Get the latest record.
 ```
 timetrace get record latest
 ```
-
+ 
 Records can be accessed using the 24-hour format, meaning 3:00 PM is 15. Display a record created on May 1st 2021, 3:00 PM:
 
 ```
@@ -370,16 +389,18 @@ timetrace list projects
 **Syntax:**
 
 ```
-timetrace list records {<YYYY-MM-DD>|today|yesterday}
+timetrace list records {<YYYY-MM-DD>|today|yesterday|current-month|last-month}
 ```
 
 **Arguments:**
 
-| Argument     | Description                                                 |
-| ------------ | ----------------------------------------------------------- |
-| `YYYY-MM-DD` | The date of the records to list, or `today` or `yesterday`. |
-| today        | List today's records.                                       |
-| yesterday    | List yesterday's records.                                   |
+| Argument         | Description                                                 |
+| ---------------- | ----------------------------------------------------------- |
+| `YYYY-MM-DD`     | The date of the records to list, or `today` or `yesterday`. |
+| today            | List today's records.                                       |
+| yesterday        | List yesterday's records.                                   |
+| current-month    | List records since the beginning of the current month.      |
+| last-month       | List records since the beginning of the previous month.     |
 
 **Flags:**
 
@@ -465,11 +486,13 @@ timetrace edit record {<KEY>|latest}
 
 **Flags:**
 
-| Flag       | Short | Description                                                                   |
-| ---------- | ----- | ----------------------------------------------------------------------------- |
-| `--plus`   | `-p`  | Add the given duration to the record's end time, e.g. `--plus 1h 10m`         |
-| `--minus`  | `-m`  | Subtract the given duration from the record's end time, e.g. `--minus 1h 10m` |
-| `--revert` | `-r`  | Revert the record to its state prior to the last edit.                        |
+| Flag            | Short | Description                                                                                  |
+| --------------- | ----- | -------------------------------------------------------------------------------------------- |
+| `--plus`        | `-p`  | Add the given duration to the record's end time, e.g. `--plus 1h 10m`                        |
+| `--minus`       | `-m`  | Subtract the given duration from the record's end time, e.g. `--minus 1h 10m`                |
+| `--revert`      | `-r`  | Revert the record to its state prior to the last edit.                                       |
+| `--billable`    | `-b`  | Modify the billable state of the record. Accepts a parseable boolean, e.g. `--billable true` |
+| `--description` | `-d`  | Modify the description of the record.                                                        |
 
 **Example:**
 
@@ -485,13 +508,25 @@ Add 15 minutes to the end of the record created on May 1st, 3PM:
 timetrace edit record 2021-05-01-15-00 --plus 15m
 ```
 
-:fire: **New:** Restore the record to its state prior to the last edit:
+Restore the record to its state prior to the last edit:
 
 ```
 timetrace edit record 2021-05-01-15-00 --revert
 ```
 
 Tip: You can get the record key `2021-05-01-15-00` using [`timetrace list records`](#list-all-records-from-a-date).
+
+Modify the description of the record created on may 1st, 3pm:
+
+```
+timetrace edit record 2021-05-01-15-00 --description "my new description"
+```
+
+Remove the description of the record created on may 1st, 3pm:
+
+```
+timetrace edit record 2021-05-01-15-00 --description ""
+```
 
 ### Delete a project
 
@@ -580,6 +615,7 @@ timetrace report
 | `--non-billable`          |       | Filter report for non-billable records.                                                                                                                            |
 | `--start <YYYY-MM-DD>`    | `-s`  | Filter report from a specific point in time (start is inclusive).                                                                                                  |
 | `--end <YYYY-MM-DD>`      | `-e`  | Filter report to a specific point in time (end is inclusive).                                                                                                      |
+| `--interval <INTERVAL>`   | `-i`  | Filter report from a specific interval. Valid values: `current-month`, `last-month`, `current-year`, `last-year`                                                   |
 | `--project <KEY>`         | `-p`  | Filter report for only one project.                                                                                                                                |
 | `--output <FORMAT>`       | `-o`  | Write report to file. Valid values: `json` or `csv`                                                                                                                |
 | `--file path/to/report`   | `-f`  | Write report to a specific file <br>(if not given will use config `report-dir`<br> if config not present writes to `$HOME/.timetrace/reports/report-<time.unix>`). |

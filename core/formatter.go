@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
@@ -14,6 +15,37 @@ type Formatter struct {
 
 const dateLayout = "2006-01-02"
 
+// ParseInterval returns the start and end time of an interval using aliases.
+func (f *Formatter) ParseInterval(interval string) (time.Time, time.Time, error) {
+	now := time.Now()
+
+	if interval == "last-month" {
+		start := time.Date(now.Year(), now.Month()-1, 1, 0, 0, 0, 0, time.Local)
+		end := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, -1, time.Local)
+		return start, end, nil
+	}
+
+	if interval == "current-month" {
+		start := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+		end := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, -1, time.Local)
+		return start, end, nil
+	}
+
+	if interval == "current-year" {
+		start := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, time.Local)
+		end := time.Date(now.Year()+1, 1, 1, 0, 0, 0, -1, time.Local)
+		return start, end, nil
+	}
+
+	if interval == "last-year" {
+		start := time.Date(now.Year()-1, 1, 1, 0, 0, 0, 0, time.Local)
+		end := time.Date(now.Year(), 1, 1, 0, 0, 0, -1, time.Local)
+		return start, end, nil
+	}
+
+	return time.Time{}, time.Time{}, errors.New("interval value not supported")
+}
+
 // ParseDate parses a date from an input string in the form YYYY-MM-DD. It also
 // supports the `today` and `yesterday` aliases for convenience.
 func (f *Formatter) ParseDate(input string) (time.Time, error) {
@@ -23,6 +55,16 @@ func (f *Formatter) ParseDate(input string) (time.Time, error) {
 	if input == "yesterday" {
 		yesterday := time.Now().AddDate(0, 0, -1)
 		return yesterday, nil
+	}
+
+	if input == "current-month" {
+		now := time.Now()
+		return time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local), nil
+	}
+
+	if input == "last-month" {
+		now := time.Now()
+		return time.Date(now.Year(), now.Month()-1, 1, 0, 0, 0, 0, time.Local), nil
 	}
 
 	date, err := time.Parse(dateLayout, input)

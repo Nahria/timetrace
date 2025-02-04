@@ -52,9 +52,9 @@ func createRecordCommand(t *core.Timetrace) *cobra.Command {
 	var options startOptions
 	var usage string
 	if t.Config().Use12Hours {
-		usage = "record <PROJECT KEY> {<YYYY-MM-DD>|today|yesterday} <HH:MMPM> <HH:MMPM>"
+		usage = "record <PROJECT KEY> {<YYYY-MM-DD>|today|yesterday|last-month|current-month} <HH:MMPM> <HH:MMPM>"
 	} else {
-		usage = "record <PROJECT KEY> {<YYYY-MM-DD>|today|yesterday} <HH:MM> <HH:MM>"
+		usage = "record <PROJECT KEY> {<YYYY-MM-DD>|today|yesterday|last-month|current-month} <HH:MM> <HH:MM>"
 	}
 	createRecord := &cobra.Command{
 		Use:   usage,
@@ -100,10 +100,11 @@ func createRecordCommand(t *core.Timetrace) *cobra.Command {
 			}
 
 			record := core.Record{
-				Project:    project,
-				Start:      start,
-				End:        &end,
-				IsBillable: options.isBillable,
+				Project:     project,
+				Start:       start,
+				End:         &end,
+				IsBillable:  options.isBillable,
+				Description: options.description,
 			}
 
 			collides, err := t.RecordCollides(record)
@@ -126,6 +127,9 @@ func createRecordCommand(t *core.Timetrace) *cobra.Command {
 
 	createRecord.Flags().BoolVarP(&options.isBillable, "billable", "b",
 		false, `mark tracked time as billable`)
+
+	createRecord.Flags().StringVar(&options.description, "description",
+		"", `add a description to the tracked time`)
 
 	return createRecord
 }

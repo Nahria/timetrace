@@ -65,10 +65,11 @@ func editProjectCommand(t *core.Timetrace) *cobra.Command {
 }
 
 type editOptions struct {
-	Plus     string
-	Minus    string
-	Billable string
-	Revert   bool
+	Plus        string
+	Minus       string
+	Billable    string
+	Revert      bool
+	Description string
 }
 
 func editRecordCommand(t *core.Timetrace) *cobra.Command {
@@ -91,6 +92,11 @@ func editRecordCommand(t *core.Timetrace) *cobra.Command {
 				return
 			}
 
+			var description *string
+			if cmd.PersistentFlags().Changed("description") {
+				description = &options.Description
+			}
+
 			if options.Revert {
 				if err := t.RevertRecord(recordTime); err != nil {
 					out.Err("failed to revert record: %s", err.Error())
@@ -105,14 +111,14 @@ func editRecordCommand(t *core.Timetrace) *cobra.Command {
 				return
 			}
 
-			if options.Minus == "" && options.Plus == "" && options.Billable == "" {
+			if options.Minus == "" && options.Plus == "" && options.Billable == "" && description == nil {
 				out.Info("Opening %s in default editor", recordTime)
 				if err := t.EditRecordManual(recordTime); err != nil {
 					out.Err("failed to edit record: %s", err.Error())
 					return
 				}
 			} else {
-				if err := t.EditRecord(recordTime, options.Plus, options.Minus, options.Billable); err != nil {
+				if err := t.EditRecord(recordTime, options.Plus, options.Minus, options.Billable, description); err != nil {
 					out.Err("failed to edit record: %s", err.Error())
 					return
 				}
@@ -126,6 +132,7 @@ func editRecordCommand(t *core.Timetrace) *cobra.Command {
 	editRecord.PersistentFlags().StringVarP(&options.Minus, "minus", "m", "", "Substracts the given duration to the end time of the record")
 	editRecord.PersistentFlags().BoolVarP(&options.Revert, "revert", "r", false, "Restores the record to it's state prior to the last 'edit' command.")
 	editRecord.PersistentFlags().StringVarP(&options.Billable, "billable", "b", "", "Sets the billable status of the record")
+	editRecord.PersistentFlags().StringVarP(&options.Description, "description", "d", "", "Sets the description of the record")
 
 	return editRecord
 }

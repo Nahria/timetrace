@@ -18,6 +18,7 @@ type reportOptions struct {
 	filePath      string
 	startTime     string
 	endTime       string
+	interval      string
 }
 
 func generateReportCommand(t *core.Timetrace) *cobra.Command {
@@ -30,6 +31,20 @@ func generateReportCommand(t *core.Timetrace) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			var startDate, endDate time.Time
 			var formatErr error
+
+			// starTime and/or endTime can't be set with period at the same time
+			if options.interval != "" && (options.startTime != "" || options.endTime != "") {
+				out.Err("startTime and endTime can't be set with interval at the same time")
+				return
+			}
+
+			if options.interval != "" {
+				startDate, endDate, formatErr = t.Formatter().ParseInterval(options.interval)
+				if formatErr != nil {
+					out.Err("failed to parse period: %s", formatErr.Error())
+					return
+				}
+			}
 
 			if options.startTime != "" {
 				startDate, formatErr = t.Formatter().ParseDate(options.startTime)
@@ -96,11 +111,12 @@ func generateReportCommand(t *core.Timetrace) *cobra.Command {
 				out.Table(
 					core.GetHeaderColumns(options.outputFormat),
 					projects,
-					[]string{"", "", "", "", "", "", "TOTAL", total},
+					[]string{"", "", "", "", "", "", "", "TOTAL", total},
 					out.TableWithCellMerge(0), // merge cells over "Project" (index:0) column
 					out.TableFooterColor(
 						tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{},
 						tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{},
+						tablewriter.Colors{},
 						tablewriter.Colors{tablewriter.Bold},          // text "TOTAL"
 						tablewriter.Colors{tablewriter.FgGreenColor}), // digit of "TOTAL"
 				)
@@ -128,6 +144,9 @@ func generateReportCommand(t *core.Timetrace) *cobra.Command {
 
 	report.Flags().StringVarP(&options.filePath, "file", "f",
 		"", "file to write report to")
+
+	report.Flags().StringVarP(&options.interval, "interval", "i",
+		"", "filter records by a specific interval (last-month, current-month, current-year, last-year)")
 
 	return report
 }

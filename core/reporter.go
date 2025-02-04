@@ -22,11 +22,11 @@ func FilterNoneNilEndTime(r *Record) bool {
 func GetHeaderColumns(outputFormat string) []string {
 	switch outputFormat {
 	case "table":
-		return []string{"Project", "Module", "Date", "Start", "End", "Duration", "Billable", "Total"}
+		return []string{"Project", "Module", "Date", "Start", "End", "Duration", "Billable", "Description", "Total"}
 	case "csv":
-		return []string{"Project", "Module", "Date", "Start", "End", "Duration", "Billable"}
+		return []string{"Project", "Module", "Date", "Start", "End", "Duration", "Billable", "Description"}
 	default:
-		return []string{"Project", "Module", "Date", "Start", "End", "Duration", "Billable", "Total"}
+		return []string{"Project", "Module", "Date", "Start", "End", "Duration", "Billable", "Description", "Total"}
 	}
 }
 
@@ -145,10 +145,10 @@ func (r Reporter) Table() ([][]string, string) {
 
 			duration := r.t.Formatter().DurationString(record.End.Sub(record.Start))
 
-			rows = append(rows, []string{key, module, date, start, end, duration, billable, ""})
+			rows = append(rows, []string{key, module, date, start, end, duration, billable, record.Description, ""})
 		}
 		// append with last row for total of tracked time for project
-		rows = append(rows, []string{"", "", "", "", "", "", defaultTotalSymbol, r.t.Formatter().FormatDuration(r.totals[key])})
+		rows = append(rows, []string{"", "", "", "", "", "", "", defaultTotalSymbol, r.t.Formatter().FormatDuration(r.totals[key])})
 		totalSum += r.totals[key]
 	}
 	return rows, r.t.Formatter().FormatDuration(totalSum)
@@ -201,7 +201,7 @@ func (r Reporter) CSV() ([]byte, error) {
 
 			duration := r.t.Formatter().DurationString(record.End.Sub(record.Start))
 
-			writer.Write([]string{key, module, date, start, end, duration, billable, ""})
+			writer.Write([]string{key, module, date, start, end, duration, billable, record.Description, ""})
 		}
 	}
 
