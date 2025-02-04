@@ -128,7 +128,7 @@ func createRecordCommand(t *core.Timetrace) *cobra.Command {
 	createRecord.Flags().BoolVarP(&options.isBillable, "billable", "b",
 		false, `mark tracked time as billable`)
 
-	createRecord.Flags().StringVar(&options.description, "description",
+	createRecord.Flags().StringVarP(&options.description, "description", "d",
 		"", `add a description to the tracked time`)
 
 	return createRecord

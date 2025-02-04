@@ -67,7 +67,7 @@ func startCommand(t *core.Timetrace) *cobra.Command {
 	start.Flags().BoolVar(&options.isNonBillable, "non-billable",
 		false, `mark tracked time as non-billable if the project is configured as billable`)
 
-	start.Flags().StringVar(&options.description, "description",
+	start.Flags().StringVarP(&options.description, "description", "d",
 		"", `add a description to the tracked time`)
 
 	return start
